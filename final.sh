@@ -1,5 +1,33 @@
 #!/bin/bash
 
+# Function to play audio using gTTS and mpv
+play_audio() {
+
+    C:/'Program Files'/Python312/python.exe - <<EOF
+from gtts import gTTS
+import os
+
+text = "Let's play ${1//+/ }"  # Update this line with your desired text
+language = "en"
+
+# Create the gTTS object
+tts = gTTS(text=text, lang=language, slow=False)
+
+# Save the audio file
+try:
+    tts.save("output.mp3")
+    print("Audio file saved successfully")
+except Exception as e:
+    print("Error saving audio file:", e)
+
+# Play the audio file using mpv
+try:
+    os.system("mpv output.mp3")
+except Exception as e:
+    print("Error playing audio file:", e)
+EOF
+}
+
 # Function to replace spaces with '+'
 format_song_name() {
   echo "${1// /+}"
@@ -25,7 +53,7 @@ transcribe_and_play() {
   # Replace spaces with '+' in the transcribed text
   formatted_song_name="$(format_song_name "$audio_input")"
   echo "$formatted_song_name"
-
+  play_audio $formatted_song_name
   # Fetch the YouTube video URL using yt-dlp
   video_url=$(yt-dlp -f bestaudio --audio-quality 0 --get-url "https://youtu.be/$(curl -s "https://vid.puffyan.us/search?q=$formatted_song_name" | grep -Eo "/watch\?v=.{11}" | head -n 1)")
 
